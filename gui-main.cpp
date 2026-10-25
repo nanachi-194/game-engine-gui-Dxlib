@@ -148,104 +148,119 @@ void printMap(int map[MAP_LIST_SIZE][MAP_LIST_Y][MAP_LIST_X][MAP_HEIGHT][MAP_WID
 	}
 }
 
-int map[MAP_LIST_SIZE][MAP_LIST_Y][MAP_LIST_X][MAP_HEIGHT][MAP_WIDTH];
+int Title(int title_end,
+	int title_start,
+	int title_title,
+	int title_v,
+	int title_bgm,
 
-int pix_0;
-int pix_1;
-int pix_2;
-int pix_3;
-int pix_4;
-int pix_5;
-int pix_6;
-int pix_7;
-int pix_p;
-int pix_win;
+	int se[3],
 
-int Rad;
+	int old_w,
+	int old_s,
+	int old_e,
+	int old_q,
 
-int bgm[MAP_LIST_SIZE];
-int se[3];
+	int w,
+	int s,
+	int e,
+	int q){
 
-int player_x = 0;
-int player_y = 1;
-int map_player_x = 0;
-int map_player_y = 0;
-bool player_win = false;
+	SetBackgroundColor(255, 154, 154);
 
-int map_list_size = 0;
+	PlaySoundMem(title_bgm, DX_PLAYTYPE_LOOP);
 
-bool key_3 = false;
-bool key_5 = false;
+	int title_y = 384;
 
-bool door_4 = false;
-bool door_6 = false;
+	while (ProcessMessage() == 0) {
+		ClearDrawScreen();//裏画面消す
+		SetDrawScreen(DX_SCREEN_BACK);//描画先を裏画面に
 
-int old_w;
-int old_s;
-int old_a;
-int old_d;
-int old_q;
+		w = CheckHitKey(KEY_INPUT_W);
+		s = CheckHitKey(KEY_INPUT_S);
+		e = CheckHitKey(KEY_INPUT_E);
+		q = CheckHitKey(KEY_INPUT_Q);
 
-int w;
-int s;
-int a;
-int d;
-int q;
+		DrawGraph(144,64, title_title, false);
+		DrawGraph(320,384, title_start, false);
+		DrawGraph(320,512, title_end, false);
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+		DrawGraph(256,title_y, title_v, false);
 
-	SetOutApplicationLogValidFlag(FALSE);//Log.txtを生成しないように設定
-	SetBackgroundColor(255, 255, 255);
-	SetFontSize(24);
-	ChangeWindowMode(TRUE);//非全画面にセット
-	SetGraphMode(790, 640, 32);//画面サイズ指定
-	SetWindowSizeExtendRate(1.0);
-	if (DxLib_Init() == 1){ return -1; }//初期化に失敗時にエラーを吐かせて終了
-
-
-	std::ifstream map_date("map_gui.map");
-
-	if (!map_date)
-	{
-		std::cout << "Not map.map file.\n";
-		return 1;
-	}
-
-	for (int size = 0; size < MAP_LIST_SIZE; size++) {
-		for (int y = 0; y < MAP_LIST_Y; y++) {
-			for (int x = 0; x < MAP_LIST_X; x++) {
-				for (int height = 0; height < MAP_HEIGHT; height++) {
-					for (int width = 0; width < MAP_WIDTH; width++) {
-						map_date >> map[size][y][x][height][width];
-					}
-				}
+		if (w && !old_w){
+			title_y = 384;
+			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+		}else if (s && !old_s){
+			title_y = 512;
+			PlaySoundMem(se[1], DX_PLAYTYPE_BACK);
+		}else if (e && !old_e){
+			if (title_y == 384){
+				DeleteSoundMem(title_bgm);
+				break;
+			}else if (title_y == 512){
+				return 1;
+			}else {
+				return 1;
 			}
+		}else if (q && !old_q){
+			return 1;
 		}
+
+		old_w = w;
+		old_s = s;
+		old_e = e;
+		old_q = q;
+
+		ScreenFlip();//裏画面を表画面にコピー
 	}
+	return 0;
+}
 
-	//
-	//ここで画像・音を読み込み
-	//
+void MainGame(int map[MAP_LIST_SIZE][MAP_LIST_Y][MAP_LIST_X][MAP_HEIGHT][MAP_WIDTH],
 
-    pix_0 = LoadGraph(_T("jpg\\0.jpg"));
-	pix_1 = LoadGraph(_T("jpg\\1.jpg"));
-	pix_2 = LoadGraph(_T("jpg\\2.jpg"));
-	pix_3 = LoadGraph(_T("jpg\\3.jpg"));
-	pix_4 = LoadGraph(_T("jpg\\4.jpg"));
-	pix_5 = LoadGraph(_T("jpg\\5.jpg"));
-	pix_6 = LoadGraph(_T("jpg\\6.jpg"));
-	pix_7 = LoadGraph(_T("jpg\\7.jpg"));
-	pix_p = LoadGraph(_T("jpg\\p.jpg"));
-	pix_win = LoadGraph(_T("jpg\\win.jpg"));
+	int pix_0,
+	int pix_1,
+	int pix_2,
+	int pix_3,
+	int pix_4,
+	int pix_5,
+	int pix_6,
+	int pix_7,
+	int pix_p,
+	int pix_win,
 
-	Rad = 0;
+	int Rad,
 
-	bgm[0] = LoadSoundMem(_T("bgm\\bgm1.mp3"));
-	bgm[1] = LoadSoundMem(_T("bgm\\bgm2.mp3"));
+	int bgm[MAP_LIST_SIZE],
+	int se[3],
 
-	se[0] = LoadSoundMem(_T("bgm\\key_get.wav"));
-	se[1] = LoadSoundMem(_T("bgm\\erabu.wav"));
-	se[2] = LoadSoundMem(_T("bgm\\win.mp3"));
+	int player_x,
+	int player_y,
+	int map_player_x,
+	int map_player_y,
+	bool player_win,
+
+	int map_list_size,
+
+	bool key_3,
+	bool key_5,
+
+	bool door_4,
+	bool door_6,
+
+	int old_w,
+	int old_s,
+	int old_a,
+	int old_d,
+	int old_q,
+
+	int w,
+	int s,
+	int a,
+	int d,
+	int q) {
+
+	SetBackgroundColor(255, 255, 255);
 
 	PlaySoundMem(bgm[0], DX_PLAYTYPE_LOOP);
 
@@ -647,6 +662,125 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 		ScreenFlip();//裏画面を表画面にコピー
 	}
+}
+
+int map[MAP_LIST_SIZE][MAP_LIST_Y][MAP_LIST_X][MAP_HEIGHT][MAP_WIDTH];
+
+int pix_0;
+int pix_1;
+int pix_2;
+int pix_3;
+int pix_4;
+int pix_5;
+int pix_6;
+int pix_7;
+int pix_p;
+int pix_win;
+
+int title_end;
+int title_start;
+int title_title;
+int title_v;
+
+int Rad;
+
+int bgm[MAP_LIST_SIZE];
+int title_bgm;
+int se[3];
+
+int player_x = 0;
+int player_y = 1;
+int map_player_x = 0;
+int map_player_y = 0;
+bool player_win = false;
+
+int map_list_size = 0;
+
+bool key_3 = false;
+bool key_5 = false;
+
+bool door_4 = false;
+bool door_6 = false;
+
+int old_w;
+int old_s;
+int old_a;
+int old_d;
+int old_q;
+int old_e;
+
+int w;
+int s;
+int a;
+int d;
+int q;
+int e;
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+
+	SetOutApplicationLogValidFlag(FALSE);//Log.txtを生成しないように設定
+	SetFontSize(24);
+	ChangeWindowMode(TRUE);//非全画面にセット
+	SetGraphMode(790, 640, 32);//画面サイズ指定
+	SetWindowSizeExtendRate(1.0);
+	if (DxLib_Init() == 1){ return -1; }//初期化に失敗時にエラーを吐かせて終了
+
+
+	std::ifstream map_date("map_gui.map");
+
+	if (!map_date)
+	{
+		std::cout << "Not map.map file.\n";
+		return 1;
+	}
+
+	for (int size = 0; size < MAP_LIST_SIZE; size++) {
+		for (int y = 0; y < MAP_LIST_Y; y++) {
+			for (int x = 0; x < MAP_LIST_X; x++) {
+				for (int height = 0; height < MAP_HEIGHT; height++) {
+					for (int width = 0; width < MAP_WIDTH; width++) {
+						map_date >> map[size][y][x][height][width];
+					}
+				}
+			}
+		}
+	}
+
+	//
+	//ここで画像・音を読み込み
+	//
+
+    pix_0 = LoadGraph(_T("jpg\\0.jpg"));
+	pix_1 = LoadGraph(_T("jpg\\1.jpg"));
+	pix_2 = LoadGraph(_T("jpg\\2.jpg"));
+	pix_3 = LoadGraph(_T("jpg\\3.jpg"));
+	pix_4 = LoadGraph(_T("jpg\\4.jpg"));
+	pix_5 = LoadGraph(_T("jpg\\5.jpg"));
+	pix_6 = LoadGraph(_T("jpg\\6.jpg"));
+	pix_7 = LoadGraph(_T("jpg\\7.jpg"));
+	pix_p = LoadGraph(_T("jpg\\p.jpg"));
+	pix_win = LoadGraph(_T("jpg\\win.jpg"));
+
+	title_end = LoadGraph(_T("jpg\\end.jpg"));
+	title_start = LoadGraph(_T("jpg\\start.jpg"));
+	title_title = LoadGraph(_T("jpg\\title.jpg"));
+	title_v = LoadGraph(_T("jpg\\v.jpg"));
+	title_bgm = LoadSoundMem(_T("bgm\\title.mp3"));
+
+	Rad = 0;
+
+	bgm[0] = LoadSoundMem(_T("bgm\\bgm1.mp3"));
+	bgm[1] = LoadSoundMem(_T("bgm\\bgm2.mp3"));
+
+	se[0] = LoadSoundMem(_T("bgm\\key_get.wav"));
+	se[1] = LoadSoundMem(_T("bgm\\erabu.wav"));
+	se[2] = LoadSoundMem(_T("bgm\\win.mp3"));
+
+	if (Title(title_end, title_start, title_title, title_v, title_bgm, se, old_w, old_s, old_e, old_q, w, s, e, q) == 1){
+		return -1;
+	}
+
+	MainGame(map, pix_0, pix_1, pix_2, pix_3, pix_4, pix_5, pix_6, pix_7, pix_p, pix_win, Rad, bgm, se, player_x, player_y, map_player_x, map_player_y, player_win, map_list_size, key_3, key_5, door_4, door_6, old_w, old_s, old_a, old_d, old_q, w, s, a, d, q);
 
 	DxLib_End();
 	return 0;
